@@ -1,5 +1,5 @@
 /*!
- * Tabxel v0.1.1
+ * Tabxel v0.1.2
  * Convert an HTML <table> into an Excel (.xlsx) file, entirely in the browser.
  *
  * Usage:

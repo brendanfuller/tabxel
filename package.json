@@ -1,6 +1,6 @@
 {
   "name": "tabxel",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "HTML table -> Excel (XLSX) converter. WASM core (rust_xlsxwriter) with a thin JS binding; ships as a single CDN-loadable ESM.",
   "type": "module",
   "main": "dist/tabxel.js",
