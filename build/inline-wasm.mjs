@@ -15,6 +15,12 @@ let glue = readFileSync(P('pkg', 'tabxel.js'), 'utf8');
 const wasm = readFileSync(P('pkg', 'tabxel_bg.wasm'));
 let extract = readFileSync(P('js', 'extract.js'), 'utf8');
 let api = readFileSync(P('js', 'tabxel.js'), 'utf8');
+const pkg = JSON.parse(readFileSync(P('package.json'), 'utf8'));
+
+// Normalize the repository URL (strip `git+` prefix and `.git` suffix).
+const repoUrl = (pkg.repository?.url || pkg.homepage || '')
+  .replace(/^git\+/, '')
+  .replace(/\.git(#.*)?$/, '');
 
 // --- find the wasm-bindgen init (default export) name ----------------------
 let initName = null;
@@ -45,8 +51,25 @@ api = api
 
 const wasmB64 = wasm.toString('base64');
 
-const out = `// Tabxel — single-file build (HTML table -> XLSX, wasm inlined). AUTO-GENERATED.
-// Source: src/lib.rs + js/*.js. Do not edit directly.
+const out = `/*!
+ * Tabxel v${pkg.version}
+ * Convert an HTML <table> into an Excel (.xlsx) file, entirely in the browser.
+ *
+ * Usage:
+ *   import { Tabxel } from 'tabxel';
+ *   const tx = new Tabxel();
+ *   tx.addTable(document.querySelector('#myTable'));
+ *   await tx.download('report.xlsx');
+ *
+ * How it works: a Rust + rust_xlsxwriter core compiled to WebAssembly (base64-inlined
+ * below) builds the workbook; a thin JavaScript layer reads the HTMLTableElement
+ * (computed styles + data-* overrides, colspan/rowspan merges, auto-filters, nested
+ * tables). This is an auto-generated single-file build with no external dependencies
+ * and no runtime fetches. Do not edit directly; edit src/lib.rs and js/*.js.
+ *
+ * Repository: ${repoUrl}
+ * License: ${pkg.license || 'MIT'}
+ */
 /* eslint-disable */
 
 ${glue}

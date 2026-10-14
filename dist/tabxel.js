@@ -1,5 +1,22 @@
-// Tabxel — single-file build (HTML table -> XLSX, wasm inlined). AUTO-GENERATED.
-// Source: src/lib.rs + js/*.js. Do not edit directly.
+/*!
+ * Tabxel v0.1.1
+ * Convert an HTML <table> into an Excel (.xlsx) file, entirely in the browser.
+ *
+ * Usage:
+ *   import { Tabxel } from 'tabxel';
+ *   const tx = new Tabxel();
+ *   tx.addTable(document.querySelector('#myTable'));
+ *   await tx.download('report.xlsx');
+ *
+ * How it works: a Rust + rust_xlsxwriter core compiled to WebAssembly (base64-inlined
+ * below) builds the workbook; a thin JavaScript layer reads the HTMLTableElement
+ * (computed styles + data-* overrides, colspan/rowspan merges, auto-filters, nested
+ * tables). This is an auto-generated single-file build with no external dependencies
+ * and no runtime fetches. Do not edit directly; edit src/lib.rs and js/*.js.
+ *
+ * Repository: https://github.com/brendanfuller/tabxel
+ * License: MIT
+ */
 /* eslint-disable */
 
 /**
