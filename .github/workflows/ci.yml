@@ -1,0 +1,55 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust (stable + wasm target)
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: wasm32-unknown-unknown
+
+      - name: Cache cargo
+        uses: Swatinem/rust-cache@v2
+
+      # Pin wasm-bindgen-cli to the exact version locked in Cargo.lock so the
+      # generated glue always matches the compiled wasm (schema versions must agree).
+      - name: Resolve wasm-bindgen version
+        id: wbg
+        run: |
+          ver=$(awk '/^name = "wasm-bindgen"$/{getline; print}' Cargo.lock | sed -n 's/^version = "\(.*\)"/\1/p' | head -1)
+          echo "ver=$ver" >> "$GITHUB_OUTPUT"
+          echo "wasm-bindgen = $ver"
+
+      - name: Install wasm-bindgen-cli + wasm-opt (prebuilt)
+        uses: taiki-e/install-action@v2
+        with:
+          tool: wasm-bindgen-cli@${{ steps.wbg.outputs.ver }},wasm-opt
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Build single-file ESM
+        run: npm run build
+
+      - name: Rust unit tests
+        run: cargo test
+
+      - name: Headless end-to-end smoke test
+        run: |
+          npm install
+          node test/smoke.mjs
+
+      # Informational: does the freshly built artifact differ from the committed one?
+      # (wasm builds aren't guaranteed byte-identical across machines, so this never fails.)
+      - name: Report dist drift
+        run: git --no-pager diff --stat -- dist/ || true

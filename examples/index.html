@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Tabxel demo</title>
+    <style>
+      body { font: 15px/1.5 system-ui, sans-serif; margin: 2rem; color: #1a1a1a; }
+      h1 { margin-bottom: .25rem; }
+      p.sub { color: #666; margin-top: 0; }
+      table { border-collapse: collapse; margin: 1rem 0; }
+      th, td { border: 1px solid #bbb; padding: 6px 12px; }
+      thead th { background: #2b5797; color: #fff; }
+      caption { caption-side: top; font-weight: 600; text-align: left; padding: 4px 0; }
+      .num { text-align: right; }
+      .good { background: #d9ead3; }
+      .bad  { background: #f4cccc; }
+      .total td { font-weight: bold; background: #fff2cc; }
+      button { font-size: 15px; padding: 8px 16px; cursor: pointer; }
+      .inner { border-collapse: collapse; font-size: 13px; }
+      .inner th { background: #666; }
+    </style>
+  </head>
+  <body>
+    <h1>Tabxel demo</h1>
+    <p class="sub">Click export to convert these tables into a styled <code>.xlsx</code> (all in the browser via WASM).</p>
+
+    <button id="export">Export to Excel</button>
+    <span id="status"></span>
+
+    <!-- Sheet 1: styled, colspan header, numbers, nested table -->
+    <table id="sales" data-sheet-name="Sales">
+      <caption>Quarterly sales</caption>
+      <colgroup>
+        <col data-width="22" />
+        <col data-width="14" data-number-format="#,##0" />
+        <col data-width="14" data-number-format="$#,##0.00" />
+        <col data-width="24" />
+      </colgroup>
+      <thead>
+        <tr>
+          <th>Region</th>
+          <th colspan="2">Performance</th>
+          <th>Breakdown</th>
+        </tr>
+        <tr>
+          <th>Name</th>
+          <th>Units</th>
+          <th>Revenue</th>
+          <th>Detail</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>North</td>
+          <td class="num">1200</td>
+          <td class="num good">48250.5</td>
+          <td>
+            <!-- nested table -> its own linked sheet -->
+            <table class="inner" data-sheet-name="North detail" aria-label="North detail">
+              <thead><tr><th>Rep</th><th>Deals</th></tr></thead>
+              <tbody>
+                <tr><td>Ana</td><td class="num">7</td></tr>
+                <tr><td>Beau</td><td class="num">5</td></tr>
+              </tbody>
+            </table>
+          </td>
+        </tr>
+        <tr>
+          <td>South</td>
+          <td class="num">860</td>
+          <td class="num bad">21900</td>
+          <td>Underperformed target</td>
+        </tr>
+        <tr class="total">
+          <td>Total</td>
+          <td class="num">2060</td>
+          <td class="num" data-formula="SUM(C3:C4)"></td>
+          <td></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- Sheet 2: a second top-level table -->
+    <table id="people" data-sheet-name="People">
+      <thead>
+        <tr><th>Name</th><th>Active</th><th>Score</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Alice</td><td data-type="bool">true</td><td class="num">91.5</td></tr>
+        <tr><td>Bob</td><td data-type="bool">false</td><td class="num">72</td></tr>
+      </tbody>
+    </table>
+
+    <script type="module">
+      import { Tabxel } from '../dist/tabxel.js';
+      const status = document.getElementById('status');
+      document.getElementById('export').addEventListener('click', async () => {
+        try {
+          status.textContent = ' building…';
+          const tx = new Tabxel();
+          tx.addTable(document.getElementById('sales'));
+          tx.addTable(document.getElementById('people'));
+          await tx.download('tabxel-demo.xlsx');
+          status.textContent = ' ✓ downloaded';
+        } catch (e) {
+          status.textContent = ' ✗ ' + e.message;
+          console.error(e);
+        }
+      });
+    </script>
+  </body>
+</html>

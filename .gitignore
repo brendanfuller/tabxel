@@ -1,0 +1,11 @@
+# Rust
+/target
+# Cargo.lock is committed for reproducible wasm builds.
+
+# wasm-bindgen output (intermediate)
+/pkg
+
+# Node
+/node_modules
+
+# Keep /dist — it's the published single-file artifact.

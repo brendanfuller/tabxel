@@ -1,0 +1,58 @@
+name: Release
+
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: wasm32-unknown-unknown
+
+      - uses: Swatinem/rust-cache@v2
+
+      - name: Resolve wasm-bindgen version
+        id: wbg
+        run: |
+          ver=$(awk '/^name = "wasm-bindgen"$/{getline; print}' Cargo.lock | sed -n 's/^version = "\(.*\)"/\1/p' | head -1)
+          echo "ver=$ver" >> "$GITHUB_OUTPUT"
+
+      - name: Install wasm-bindgen-cli + wasm-opt (prebuilt)
+        uses: taiki-e/install-action@v2
+        with:
+          tool: wasm-bindgen-cli@${{ steps.wbg.outputs.ver }},wasm-opt
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Build
+        run: npm run build
+
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.ref_name }}
+          REPO: ${{ github.repository }}
+        run: |
+          cat > notes.md <<EOF
+          ## Tabxel $TAG
+
+          Load from jsDelivr (immutable, pinned to this tag):
+
+          \`\`\`js
+          import { Tabxel } from 'https://cdn.jsdelivr.net/gh/$REPO@$TAG/dist/tabxel.js';
+          \`\`\`
+          EOF
+          gh release create "$TAG" \
+            --title "Tabxel $TAG" \
+            --notes-file notes.md \
+            dist/tabxel.js dist/tabxel.d.ts

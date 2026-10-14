@@ -1,0 +1,29 @@
+[package]
+name = "tabxel"
+version = "0.1.0"
+edition = "2021"
+description = "HTML table -> XLSX converter core (WASM)"
+license = "MIT"
+
+[lib]
+# cdylib for the wasm artifact, rlib so `cargo test` can link the crate natively.
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+# Base (host) deps. No `wasm` feature here, so native `cargo test` does not pull js-sys.
+rust_xlsxwriter = "0.93"
+serde = { version = "1", features = ["derive"] }
+
+# wasm-only deps. Cargo merges these onto the base deps when the target is wasm32,
+# enabling rust_xlsxwriter's `wasm` feature (XlsxError -> JsValue) and the JS glue.
+[target.'cfg(target_arch = "wasm32")'.dependencies]
+rust_xlsxwriter = { version = "0.93", features = ["wasm"] }
+wasm-bindgen = "0.2"
+serde-wasm-bindgen = "0.6"
+
+[profile.release]
+opt-level = "z"
+lto = true
+codegen-units = 1
+panic = "abort"
+strip = true

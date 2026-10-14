@@ -1,0 +1,49 @@
+{
+  "name": "tabxel",
+  "version": "0.1.0",
+  "description": "HTML table -> Excel (XLSX) converter. WASM core (rust_xlsxwriter) with a thin JS binding; ships as a single CDN-loadable ESM.",
+  "type": "module",
+  "main": "dist/tabxel.js",
+  "module": "dist/tabxel.js",
+  "types": "dist/tabxel.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/tabxel.d.ts",
+      "default": "./dist/tabxel.js"
+    }
+  },
+  "files": [
+    "dist/"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/brendanfuller/tabxel.git"
+  },
+  "homepage": "https://github.com/brendanfuller/tabxel#readme",
+  "bugs": {
+    "url": "https://github.com/brendanfuller/tabxel/issues"
+  },
+  "scripts": {
+    "build:wasm": "PATH=\"$HOME/.cargo/bin:$PATH\" cargo build --release --target wasm32-unknown-unknown",
+    "build:bindgen": "PATH=\"$HOME/.cargo/bin:$PATH\" wasm-bindgen --target web --no-typescript --out-dir pkg target/wasm32-unknown-unknown/release/tabxel.wasm",
+    "build:opt": "wasm-opt -Oz --enable-bulk-memory --enable-nontrapping-float-to-int --enable-sign-ext --enable-mutable-globals --enable-reference-types pkg/tabxel_bg.wasm -o pkg/tabxel_bg.wasm || echo 'wasm-opt step skipped/failed; continuing with unoptimized wasm'",
+    "build:bundle": "node build/inline-wasm.mjs",
+    "build": "npm run build:wasm && npm run build:bindgen && npm run build:opt && npm run build:bundle",
+    "test": "PATH=\"$HOME/.cargo/bin:$PATH\" cargo test",
+    "test:smoke": "node test/smoke.mjs",
+    "serve": "python3 -m http.server 8080"
+  },
+  "devDependencies": {
+    "jsdom": "^24.1.3"
+  },
+  "keywords": [
+    "excel",
+    "xlsx",
+    "html-table",
+    "wasm",
+    "webassembly",
+    "export",
+    "spreadsheet"
+  ],
+  "license": "MIT"
+}
