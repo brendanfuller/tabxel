@@ -17,6 +17,25 @@ function rgbToHex(value) {
   return `#${hex(m[1])}${hex(m[2])}${hex(m[3])}`.toUpperCase();
 }
 
+/**
+ * Resolve the effective background for a cell. `background-color` does not inherit
+ * in CSS, so a fill set on the `<tr>`, section, or `<table>` (e.g.
+ * `table.class thead tr { ... }`) leaves the cell itself transparent even though the
+ * row color shows through. Walk ancestors up to (and including) the table and return
+ * the nearest non-transparent background — matching what the user sees. Stops at the
+ * table so the page/body background is never pulled in.
+ */
+function effectiveBg(cell) {
+  let el = cell;
+  while (el && el.nodeType === 1 /* Element */) {
+    const hex = rgbToHex(getComputedStyle(el).backgroundColor);
+    if (hex) return hex;
+    if (el.tagName === 'TABLE') break;
+    el = el.parentElement;
+  }
+  return null;
+}
+
 /** Approximate Excel column width (character units) from a pixel width. */
 function pxToExcelWidth(px) {
   if (!px || px <= 0) return undefined;
@@ -54,7 +73,7 @@ function styleFor(cell) {
   const cs = getComputedStyle(cell);
   const style = {};
 
-  const bg = rgbToHex(cs.backgroundColor);
+  const bg = effectiveBg(cell);
   if (bg) style.bg = bg;
 
   const color = rgbToHex(cs.color);
