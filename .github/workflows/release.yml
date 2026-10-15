@@ -34,7 +34,10 @@ jobs:
         with:
           node-version: 20
 
-      - name: Build
+      - name: Install node dependencies
+        run: npm install
+
+      - name: Build (full + minified)
         run: npm run build
 
       - name: Create GitHub Release
@@ -50,9 +53,11 @@ jobs:
 
           \`\`\`js
           import { Tabxel } from 'https://cdn.jsdelivr.net/gh/$REPO@$TAG/dist/tabxel.js';
+          // minified:
+          import { Tabxel } from 'https://cdn.jsdelivr.net/gh/$REPO@$TAG/dist/tabxel.min.js';
           \`\`\`
           EOF
           gh release create "$TAG" \
             --title "Tabxel $TAG" \
             --notes-file notes.md \
-            dist/tabxel.js dist/tabxel.d.ts
+            dist/tabxel.js dist/tabxel.min.js dist/tabxel.d.ts

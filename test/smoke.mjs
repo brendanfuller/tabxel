@@ -48,7 +48,13 @@ globalThis.Blob = dom.window.Blob;
 globalThis.Node = dom.window.Node;
 if (!globalThis.atob) globalThis.atob = (b) => Buffer.from(b, 'base64').toString('binary');
 
-const { Tabxel } = await import('../dist/tabxel.js');
+// Entry module under test: defaults to the full build; pass a path to test another
+// (e.g. `node test/smoke.mjs dist/tabxel.min.js`). Only the file name is used.
+const entryArg = process.argv[2] || 'dist/tabxel.js';
+const entryFile = entryArg.split('/').pop();
+const entryUrl = new URL(`../dist/${entryFile}`, import.meta.url);
+console.log(`\n[smoke] testing dist/${entryFile}`);
+const { Tabxel } = await import(entryUrl);
 
 const tx = new Tabxel();
 tx.addTable(document.getElementById('sales'));

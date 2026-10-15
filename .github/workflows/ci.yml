@@ -38,16 +38,17 @@ jobs:
         with:
           node-version: 20
 
-      - name: Build single-file ESM
+      - name: Install node dependencies
+        run: npm install
+
+      - name: Build single-file ESM (+ minified)
         run: npm run build
 
       - name: Rust unit tests
         run: cargo test
 
-      - name: Headless end-to-end smoke test
-        run: |
-          npm install
-          node test/smoke.mjs
+      - name: Headless end-to-end smoke test (full + minified)
+        run: npm run test:smoke
 
       # Informational: does the freshly built artifact differ from the committed one?
       # (wasm builds aren't guaranteed byte-identical across machines, so this never fails.)

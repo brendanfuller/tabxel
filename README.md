@@ -6,7 +6,7 @@ Convert an HTML `<table>` into an Excel file, entirely in the browser.
 
 ```html
 <script type="module">
-  import { Tabxel } from 'https://cdn.jsdelivr.net/gh/brendanfuller/tabxel@v0.1.0/dist/tabxel.js';
+  import { Tabxel } from 'https://cdn.jsdelivr.net/gh/brendanfuller/tabxel@v0.1.3/dist/tabxel.js';
 
   const tx = new Tabxel();
   tx.addTable(document.querySelector('#report'));
@@ -70,11 +70,16 @@ Served from [jsDelivr](https://www.jsdelivr.com/) with correct CORS and MIME, ca
 
 ```js
 // Pinned to a release (recommended):
-import { Tabxel } from 'https://cdn.jsdelivr.net/gh/brendanfuller/tabxel@v0.1.0/dist/tabxel.js';
+import { Tabxel } from 'https://cdn.jsdelivr.net/gh/brendanfuller/tabxel@v0.1.3/dist/tabxel.js';
+
+// Minified build:
+import { Tabxel } from 'https://cdn.jsdelivr.net/gh/brendanfuller/tabxel@v0.1.3/dist/tabxel.min.js';
 
 // Latest tag:
 import { Tabxel } from 'https://cdn.jsdelivr.net/gh/brendanfuller/tabxel@latest/dist/tabxel.js';
 ```
+
+`dist/tabxel.min.js` strips inline comments and keeps a single banner line. The inlined WebAssembly dominates the file size, so minification trims only a little and both compress to about the same size over the wire.
 
 ## Building from source
 
